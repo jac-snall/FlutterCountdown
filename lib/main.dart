@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:countdown/countdownwidget.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,18 +21,17 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
       ),
       home: MyHomePage(
-        title: 'Flutter Demo Home Page',
-        key: UniqueKey(),
+        title: 'Countdown',
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({required Key key, required this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -51,41 +49,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  int _seconds = 0;
-  late Timer _timer;
+  var _countdownList = [
+    CountdownWidget(
+      eventName: 'Long Text Long Text',
+      eventTime: DateTime.parse('2021-08-07T13:00'),
+    ),
+    CountdownWidget(
+      eventName: 'Test2',
+      eventTime: DateTime.parse('2022-01-15'),
+    ),
+    CountdownWidget(
+      eventName: 'Test3',
+      eventTime: DateTime.parse('2021-01-23T14:21'),
+    ),
+  ];
 
-  //Overrides init state for adding a timer
-  @override
-  void initState() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _updateSeconds();
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  void _updateSeconds() {
-    setState(() {
-      _seconds = DateTime.now().second;
-    });
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _addCountdown(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2300),
+    );
+    if (picked != null) {
+      setState(() {
+        _countdownList.add(CountdownWidget(
+          eventTime: picked,
+          eventName: 'Hello',
+        ));
+      });
+    }
   }
 
   @override
@@ -105,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
+        child: ListView(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -120,27 +113,13 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Text(
-              'Seconds',
-            ),
-            Text(
-              '$_seconds',
-            ),
-          ],
+          //mainAxisAlignment: MainAxisAlignment.center,
+          children: _countdownList,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () => _addCountdown(context),
+        tooltip: 'Add countdown',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
