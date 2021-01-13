@@ -81,6 +81,18 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _showAlertDialog(BuildContext context) async {
+    CountdownWidget? countdown = await showDialog<CountdownWidget>(
+      context: context,
+      builder: (context) => CreateEventWidget(),
+    );
+    if (countdown != null) {
+      setState(() {
+        _countdownList.add(countdown);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -118,10 +130,97 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addCountdown(context),
+        //onPressed: () => _addCountdown(context),
+        onPressed: () => _showAlertDialog(context),
         tooltip: 'Add countdown',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class CreateEventWidget extends StatefulWidget {
+  @override
+  _CreateEventWidgetState createState() => _CreateEventWidgetState();
+}
+
+class _CreateEventWidgetState extends State<CreateEventWidget> {
+  //Text editing controller
+  final textController = TextEditingController(text: 'Event name');
+
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
+
+  DateTime eventDate = DateTime(2020);
+  TimeOfDay eventTime = TimeOfDay.now();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Hello 222'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: [
+            TextField(
+              controller: textController,
+            ),
+            FlatButton(
+              onPressed: () async {
+                eventDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2300),
+                    ) ??
+                    eventDate;
+                setState(() {});
+              },
+              child:
+                  Text('${eventDate.year}-${eventDate.month}-${eventDate.day}'),
+            ),
+            FlatButton(
+              onPressed: () async {
+                eventTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    ) ??
+                    eventTime;
+                setState(() {});
+              },
+              child: Text('${eventTime.hour}:${eventTime.minute}'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text('Add'),
+          onPressed: () {
+            DateTime dt = eventDate.add(
+              Duration(
+                hours: eventTime.hour,
+                minutes: eventTime.minute,
+              ),
+            );
+            Navigator.pop(
+              context,
+              CountdownWidget(
+                eventTime: dt,
+                eventName: textController.text,
+              ),
+            );
+          },
+        ),
+        TextButton(
+          child: Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        )
+      ],
     );
   }
 }
